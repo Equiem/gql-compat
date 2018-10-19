@@ -1,0 +1,103 @@
+{
+  "name": "@equiem/graphql-compat",
+  "version": "0.0.1",
+  "description": "A tool for checking the compatibility of two GraphQL schemas.",
+  "main": "dist/index.js",
+  "bin": {
+    "gql-compat": "dist/index.js"
+  },
+  "config": {
+    "mochaOpts": "mocha.opts"
+  },
+  "dependencies": {
+    "@types/graphql": "^14.0.3",
+    "@types/mock-fs": "^3.6.30",
+    "@types/shelljs": "^0.8.0",
+    "chalk": "^2.4.1",
+    "cli-table3": "^0.5.1",
+    "commander": "^2.19.0",
+    "glob": "^7.1.3",
+    "glob-promise": "^3.4.0",
+    "graphql": "^14.0.2",
+    "log4js": "^3.0.6",
+    "mock-fs": "^4.7.0",
+    "runtypes": "^2.1.6",
+    "shelljs": "^0.8.2",
+    "typescript": "~3.0.3"
+  },
+  "devDependencies": {
+    "@types/chai": "~4.1.5",
+    "@types/chai-as-promised": "~7.1.0",
+    "@types/mocha": "~2.2.48",
+    "@types/nock": "^9.3.0",
+    "@types/sinon": "^5.0.5",
+    "chai": "~4.1.2",
+    "chai-as-promised": "~7.1.1",
+    "mocha": "~5.0.5",
+    "mocha-junit-reporter": "~1.18.0",
+    "mocha-typescript": "~1.1.12",
+    "nock": "^10.0.0",
+    "nyc": "~13.0.1",
+    "sinon": "^6.3.5",
+    "source-map-support": "^0.5.9",
+    "testdouble": "^3.8.1",
+    "tslint": "^5.11.0",
+    "tslint-eslint-rules": "^5.4.0"
+  },
+  "nyc": {
+    "include": [
+      "**/*.js"
+    ],
+    "exclude": [
+      "node_modules/**/*.js"
+    ],
+    "extension": [
+      ".js"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "sourceMap": true,
+    "checkCoverage": true,
+    "branches": 64,
+    "functions": 70,
+    "lines": 70,
+    "statements": 70,
+    "watermarks": {
+      "branches": [
+        80,
+        90
+      ],
+      "functions": [
+        80,
+        90
+      ],
+      "lines": [
+        80,
+        90
+      ],
+      "statements": [
+        80,
+        90
+      ]
+    },
+    "instrument": true
+  },
+  "scripts": {
+    "build-clean": "rm -rf dist",
+    "build": "npm run build-clean && tsc && chmod u+x dist/index.js",
+    "mocha": "bin/nyc-mocha --opts $npm_package_config_mochaOpts",
+    "debug": "npm run build && npm run mocha",
+    "test": "tslint -p . && npm run build && npm run mocha && bin/no-tracked-changes"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Equiem/graphql-compat.git"
+  },
+  "author": "james.harvey@equiem.com.au",
+  "bugs": {
+    "url": "https://github.com/Equiem/graphql-compat/issues"
+  },
+  "homepage": "https://github.com/Equiem/graphql-compat#readme"
+}

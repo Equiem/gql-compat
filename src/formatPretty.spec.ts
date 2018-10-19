@@ -21,6 +21,10 @@ export class FormatPrettySpec {
     this.clock = sinon.useFakeTimers({ now: new Date() });
   }
 
+  public after(): void {
+    this.clock.reset();
+  }
+
   @test("pretty format breaking changes")
   public prettyFormat(): void {
     const changes: BreakingChange[] = [

@@ -27,6 +27,9 @@ let FormatPrettySpec = class FormatPrettySpec {
     before() {
         this.clock = sinon_1.default.useFakeTimers({ now: new Date() });
     }
+    after() {
+        this.clock.reset();
+    }
     prettyFormat() {
         const changes = [
             { type: "FIELD_REMOVED", description: "User.uuid was removed" },

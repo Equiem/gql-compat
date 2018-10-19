@@ -4,17 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
-const WhitelistedChanges_1 = require("./WhitelistedChanges");
+const WhitelistedChange_1 = require("./WhitelistedChange");
 /**
  * Formats the given breaking changes in pretty format.
  */
 exports.filterWhitelisted = (changes, whitelistFile, toleranceMs) => {
     const now = new Date().getTime();
     try {
-        const whitelist = WhitelistedChanges_1.WhitelistedChanges.check(fs_1.default.readFileSync(whitelistFile)
+        const whitelist = fs_1.default.readFileSync(whitelistFile)
             .toString()
             .split("\n")
-            .map((line) => JSON.parse(line)));
+            .map((line) => WhitelistedChange_1.WhitelistedChange.check(JSON.parse(line)));
         return changes.filter((change) => {
             const whitelisted = whitelist.filter((wchange) => wchange.description === change.description && wchange.type === change.type).sort((wchange) => wchange.timestamp < wchange.timestamp ? -1 : (wchange.timestamp > wchange.timestamp ? 1 : 0));
             if (whitelisted.length > 0) {

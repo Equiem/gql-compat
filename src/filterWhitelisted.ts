@@ -1,6 +1,6 @@
 import fs from "fs";
 import { BreakingChange } from "graphql";
-import { WhitelistedChanges } from "./WhitelistedChanges";
+import { WhitelistedChange } from "./WhitelistedChange";
 
 /**
  * Formats the given breaking changes in pretty format.
@@ -13,12 +13,10 @@ export const filterWhitelisted = (
   const now = new Date().getTime();
 
   try {
-    const whitelist = WhitelistedChanges.check(
-      fs.readFileSync(whitelistFile)
+    const whitelist = fs.readFileSync(whitelistFile)
         .toString()
         .split("\n")
-        .map((line) => JSON.parse(line)),
-    );
+        .map((line) => WhitelistedChange.check(JSON.parse(line)));
 
     return changes.filter((change) => {
       const whitelisted = whitelist.filter(

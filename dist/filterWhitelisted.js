@@ -14,6 +14,8 @@ exports.filterWhitelisted = (changes, whitelistFile, toleranceMs) => {
         const whitelist = fs_1.default.readFileSync(whitelistFile)
             .toString()
             .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0)
             .map((line) => WhitelistedChange_1.WhitelistedChange.check(JSON.parse(line)));
         return changes.filter((change) => {
             const whitelisted = whitelist.filter((wchange) => wchange.description === change.description && wchange.type === change.type).sort((wchange) => wchange.timestamp < wchange.timestamp ? -1 : (wchange.timestamp > wchange.timestamp ? 1 : 0));

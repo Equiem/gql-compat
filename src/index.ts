@@ -5,6 +5,7 @@ import { findBreakingChanges } from "graphql";
 import { getLogger, Logger } from "log4js";
 import shell from "shelljs";
 import { CommandOptions } from "./CommandOptions";
+import { filterWhitelisted } from "./filterWhitelisted";
 import { loadSchema } from "./loadSchema";
 import { parseFileLocator } from "./parseFileLocator";
 import { reportBreakingChanges } from "./reportBreakingChanges";
@@ -28,6 +29,12 @@ const cmd = program
   + "You can create this file using the 'whitelist' output format.",
 )
 .option(
+  "-t, --whitelist-tolerance <path/to/file>",
+  "The length of time in seconds for which whitelisted breakages are valid",
+  parseInt,
+  7 * 24 * 60 * 60,
+)
+.option(
   "-f, --format <pretty|whitelist>",
   "The format in which output should be displayed.",
   "pretty",
@@ -36,10 +43,7 @@ const cmd = program
 /**
  * The main program entry point.
  */
-const main = async (
-  command: program.Command,
-  logger: Logger,
-): Promise<void> => {
+const main = async (command: program.Command): Promise<void> => {
   if (!CommandOptions.guard(command)) {
     shell.echo("Invalid options provided.\n");
     program.outputHelp();
@@ -52,7 +56,15 @@ const main = async (
     loadSchema(parseFileLocator(command.newSchema), shell),
   ]);
 
-  const breakingChanges = findBreakingChanges(oldSchema, newSchema);
+  let breakingChanges = findBreakingChanges(oldSchema, newSchema);
+  if (command.whitelist != null) {
+    breakingChanges = filterWhitelisted(
+      breakingChanges,
+      command.whitelist,
+      command.whitelistTolerance * 1000,
+    );
+  }
+
   reportBreakingChanges(breakingChanges, command.format, shell);
 
   process.exit(breakingChanges.length === 0 ? 0 : 1);
@@ -64,7 +76,7 @@ mainLogger.level = process.env.LOG_LEVEL != null ? process.env.LOG_LEVEL : "erro
 /**
  * Execute the program.
  */
-main(cmd.parse(process.argv), mainLogger).catch((err) => {
+main(cmd.parse(process.argv)).catch((err) => {
   mainLogger.error(`${err}`);
   process.exit(1);
 });

@@ -37,6 +37,17 @@ export class LoadSchemaSpec {
     expect(product).not.to.be.undefined;
   }
 
+  @test("check for presence of git")
+  public async checkForGit(): Promise<void> {
+    const shell = td.object<typeof shelljs>("shell");
+    const committish = "master";
+    const glob = "src/**/*.graphql";
+
+    td.when(shell.which("git")).thenReturn(false);
+
+    expect(loadSchema({ committish, glob }, shell)).to.eventually.be.rejectedWith("Sorry, this script requires git");
+  }
+
   @test("load schema from committish:glob pattern")
   public async loadCommittishGlobPattern(): Promise<void> {
     const shell = td.object<typeof shelljs>("shell");

@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised";
 import { BreakingChange } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import sinon from "sinon";
-import { formatWhitelist } from "./formatWhitelist";
+import { formatPretty } from "./formatPretty";
 
 chaiUse(chaiAsPromised);
 
@@ -14,28 +14,30 @@ chaiUse(chaiAsPromised);
  * Tests for the Environment.
  */
 @suite(timeout(300), slow(50))
-export class FormatWhitelistSpec {
+export class FormatPrettySpec {
   private clock: sinon.SinonFakeTimers;
 
   public before(): void {
     this.clock = sinon.useFakeTimers({ now: new Date() });
   }
 
-  @test("append current timestamp to each breaking change")
-  public appendTimestamp(): void {
+  public after(): void {
+    this.clock.reset();
+  }
+
+  @test("pretty format breaking changes")
+  public prettyFormat(): void {
     const changes: BreakingChange[] = [
       { type: "FIELD_REMOVED", description: "User.uuid was removed" },
-      { type: "FIELD_REMOVED", description: "User.name was removed" },
+      { type: "TYPE_REMOVED", description: "User was removed" },
     ];
 
-    const output = formatWhitelist(changes).split("\n").map((line) => JSON.parse(line));
+    const output = formatPretty(changes);
 
-    expect(output[0]).to.deep.eq(
-      { ...changes[0], timestamp: this.clock.Date().getTime() },
-    );
-
-    expect(output[1]).to.deep.eq(
-      { ...changes[1], timestamp: this.clock.Date().getTime() },
-    );
+    expect(output).to.include("Breaking changes were detected");
+    expect(output).to.include("FIELD_REMOVED");
+    expect(output).to.include("User.uuid was removed");
+    expect(output).to.include("TYPE_REMOVED");
+    expect(output).to.include("User was removed");
   }
 }

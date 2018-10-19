@@ -51,6 +51,15 @@ let LoadSchemaSpec = class LoadSchemaSpec {
             chai_1.expect(product).not.to.be.undefined;
         });
     }
+    checkForGit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const shell = testdouble_1.default.object("shell");
+            const committish = "master";
+            const glob = "src/**/*.graphql";
+            testdouble_1.default.when(shell.which("git")).thenReturn(false);
+            chai_1.expect(loadSchema_1.loadSchema({ committish, glob }, shell)).to.eventually.be.rejectedWith("Sorry, this script requires git");
+        });
+    }
     loadCommittishGlobPattern() {
         return __awaiter(this, void 0, void 0, function* () {
             const shell = testdouble_1.default.object("shell");
@@ -82,6 +91,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], LoadSchemaSpec.prototype, "loadGlobPattern", null);
+__decorate([
+    mocha_typescript_1.test("check for presence of git"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], LoadSchemaSpec.prototype, "checkForGit", null);
 __decorate([
     mocha_typescript_1.test("load schema from committish:glob pattern"),
     __metadata("design:type", Function),

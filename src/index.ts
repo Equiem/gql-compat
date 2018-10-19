@@ -66,4 +66,5 @@ mainLogger.level = process.env.LOG_LEVEL != null ? process.env.LOG_LEVEL : "erro
  */
 main(cmd.parse(process.argv), mainLogger).catch((err) => {
   mainLogger.error(`${err}`);
+  process.exit(1);
 });

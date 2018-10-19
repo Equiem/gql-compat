@@ -16,6 +16,8 @@ export const filterWhitelisted = (
     const whitelist = fs.readFileSync(whitelistFile)
         .toString()
         .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
         .map((line) => WhitelistedChange.check(JSON.parse(line)));
 
     return changes.filter((change) => {

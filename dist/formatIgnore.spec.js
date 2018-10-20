@@ -16,14 +16,14 @@ const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const mocha_typescript_1 = require("mocha-typescript");
 const sinon_1 = __importDefault(require("sinon"));
-const formatWhitelist_1 = require("./formatWhitelist");
+const formatIgnore_1 = require("./formatIgnore");
 chai_1.use(chai_as_promised_1.default);
 // tslint:disable:no-unsafe-any
 // tslint:disable:no-unused-expression
 /**
  * Tests for the Environment.
  */
-let FormatWhitelistSpec = class FormatWhitelistSpec {
+let FormatIgnoreSpec = class FormatIgnoreSpec {
     before() {
         this.clock = sinon_1.default.useFakeTimers({ now: new Date() });
     }
@@ -35,7 +35,7 @@ let FormatWhitelistSpec = class FormatWhitelistSpec {
             { type: "FIELD_REMOVED", description: "User.uuid was removed" },
             { type: "FIELD_REMOVED", description: "User.name was removed" },
         ];
-        const output = formatWhitelist_1.formatWhitelist(changes).split("\n").map((line) => JSON.parse(line));
+        const output = formatIgnore_1.formatIgnore(changes).split("\n").map((line) => JSON.parse(line));
         chai_1.expect(output[0]).to.deep.eq(Object.assign({}, changes[0], { timestamp: this.clock.Date().getTime() }));
         chai_1.expect(output[1]).to.deep.eq(Object.assign({}, changes[1], { timestamp: this.clock.Date().getTime() }));
     }
@@ -45,9 +45,9 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], FormatWhitelistSpec.prototype, "appendTimestamp", null);
-FormatWhitelistSpec = __decorate([
+], FormatIgnoreSpec.prototype, "appendTimestamp", null);
+FormatIgnoreSpec = __decorate([
     mocha_typescript_1.suite(mocha_typescript_1.timeout(300), mocha_typescript_1.slow(50))
-], FormatWhitelistSpec);
-exports.FormatWhitelistSpec = FormatWhitelistSpec;
-//# sourceMappingURL=formatWhitelist.spec.js.map
+], FormatIgnoreSpec);
+exports.FormatIgnoreSpec = FormatIgnoreSpec;
+//# sourceMappingURL=formatIgnore.spec.js.map

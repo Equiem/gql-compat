@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * Formats the given breaking changes in whitelist format.
+ * Formats the given breaking changes in ignore format.
  */
-exports.formatWhitelist = (changes) => {
+exports.formatIgnore = (changes) => {
     const timestamp = new Date().getTime();
     return changes.map((change) => (JSON.stringify(Object.assign({}, change, { timestamp })))).join("\n");
 };
-//# sourceMappingURL=formatWhitelist.js.map
+//# sourceMappingURL=formatIgnore.js.map

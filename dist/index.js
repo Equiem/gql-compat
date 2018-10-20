@@ -12,53 +12,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const chalk_1 = __importDefault(require("chalk"));
 const commander_1 = __importDefault(require("commander"));
-const graphql_1 = require("graphql");
 const log4js_1 = require("log4js");
 const shelljs_1 = __importDefault(require("shelljs"));
-const CommandOptions_1 = require("./CommandOptions");
-const filterWhitelisted_1 = require("./filterWhitelisted");
-const loadSchema_1 = require("./loadSchema");
-const parseFileLocator_1 = require("./parseFileLocator");
+const config_1 = require("./config");
+const findBreakingChanges_1 = require("./findBreakingChanges");
+const ignoreBreakingChanges_1 = require("./ignoreBreakingChanges");
 const reportBreakingChanges_1 = require("./reportBreakingChanges");
-const cmd = commander_1.default
-    .name("gql-compat")
-    .version("0.0.1")
-    .option("-o, --old-schema <[committish:]glob-pattern>", "A glob pattern matching one or more IDL schema files in the given committish "
-    + "in the current repository. If the committish prefix is ommitted the current working copy is used.")
-    .option("-n, --new-schema <[committish:]glob-pattern>", "A glob pattern matching one or more IDL schema files in the given committish "
-    + "in the current repository. If the committish prefix is ommitted the current working copy is used.")
-    .option("-w, --whitelist <path/to/file>", "The path to a whitelist file, which lists incompatibilities that should be ignored. "
-    + "You can create this file using the 'whitelist' output format.")
-    .option("-t, --whitelist-tolerance <path/to/file>", "The length of time in seconds for which whitelisted breakages are valid", parseInt, 7 * 24 * 60 * 60)
-    .option("-f, --format <pretty|whitelist>", "The format in which output should be displayed.", "pretty");
-/**
- * The main program entry point.
- */
-const main = (command) => __awaiter(this, void 0, void 0, function* () {
-    if (!CommandOptions_1.CommandOptions.guard(command)) {
-        shelljs_1.default.echo("Invalid options provided.\n");
-        commander_1.default.outputHelp();
-        return;
-    }
-    const [oldSchema, newSchema] = yield Promise.all([
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(command.oldSchema), shelljs_1.default),
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(command.newSchema), shelljs_1.default),
-    ]);
-    let breakingChanges = graphql_1.findBreakingChanges(oldSchema, newSchema);
-    if (command.whitelist != null) {
-        breakingChanges = filterWhitelisted_1.filterWhitelisted(breakingChanges, command.whitelist, command.whitelistTolerance * 1000);
-    }
-    reportBreakingChanges_1.reportBreakingChanges(breakingChanges, command.format, shelljs_1.default);
-    process.exit(breakingChanges.length === 0 ? 0 : 1);
-});
 const mainLogger = log4js_1.getLogger();
 mainLogger.level = process.env.LOG_LEVEL != null ? process.env.LOG_LEVEL : "error";
-/**
- * Execute the program.
- */
-main(cmd.parse(process.argv)).catch((err) => {
-    mainLogger.error(`${err}`);
+commander_1.default
+    .name("gql-compat")
+    .version("0.0.1")
+    .option("-t, --ignore-tolerance <seconds>", "The length of time for which ignored breakages are ignored.", parseInt, 7 * 24 * 60 * 60);
+commander_1.default
+    .command("check <old-schema-locator> <new-schema-locator>")
+    .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
+    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options, shelljs_1.default);
+    reportBreakingChanges_1.reportBreakingChanges(breakingChanges, shelljs_1.default);
+    process.exit(breakingChanges.length === 0 ? 0 : 1);
+}));
+commander_1.default
+    .command("ignore <old-schema-locator> <new-schema-locator>")
+    .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
+    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options, shelljs_1.default);
+    ignoreBreakingChanges_1.ignoreBreakingChanges(breakingChanges, config_1.IGNORE_FILE, shelljs_1.default);
+}));
+commander_1.default.on("command:*", () => {
+    shelljs_1.default.echo(`Invalid command: ${commander_1.default.args.join(" ")}\nSee --help for a list of available commands.`);
     process.exit(1);
 });
+commander_1.default.on("--help", () => {
+    shelljs_1.default.echo(`
+
+${chalk_1.default.bold.underline("Locators")}
+
+Locators are a string representing one or more files, either in the current
+working directory or in a committish in the currently active git repository.
+
+  glob                  eg. path/to/**/*.graphql
+  committish:pattern    eg. origin/master:path/to/*/*.graphql
+
+Note that committish:patterns follow the rules of the git ls-tree command which
+is not the same as a glob.`);
+});
+commander_1.default.parse(process.argv);
 //# sourceMappingURL=index.js.map

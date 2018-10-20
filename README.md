@@ -30,20 +30,16 @@ Then in `package.json` add:
 Compare schema in master against schema in current working copy.
 
 ```bash
-$ gql-compat --old-schema 'origin/master:path/to/*/*.graphql' --new-schema 'path/to/*/*.graphql'
+$ gql-compat check 'origin/master:path/to/*/*.graphql' 'path/to/*/*.graphql'
 ```
 
-Append to whitelist file.
+Append all current breaking changes to the ignore file: `.gql-compat-ignore`.
 
 ```bash
-$ gql-compat -o 'origin/master:path/to/*/*.graphql' -n 'path/to/*/*.graphql' --format whitelist >> path/to/whitelist.json
+$ gql-compat ignore 'origin/master:path/to/*/*.graphql' 'path/to/*/*.graphql'
 ```
 
-Ignore ignored breaking changes store in whitelist file.
-
-```bash
-$ gql-compat -o 'origin/master:path/to/*/*.graphql' -n 'path/to/*/*.graphql' --whitelist path/to/whitelist.json
-```
+Now all current breaking changes will be ignored for a period of time (the `--ignore-tolerance` period, which defaults to 7 days).
 
 ## Known Issues
 
@@ -57,7 +53,7 @@ For example, the following command will match files differently in the working c
 
 Command:
 ```bash
-$ gql-compat -o 'origin/master:path/to/**/*.graphql' -n 'path/to/**/*.graphql' --whitelist path/to/whitelist.json
+$ gql-compat 'origin/master:path/to/**/*.graphql' 'path/to/**/*.graphql'
 ```
 
 Files matched in orign/master:

@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised";
 import { BreakingChange } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import sinon from "sinon";
-import { formatWhitelist } from "./formatWhitelist";
+import { formatIgnore } from "./formatIgnore";
 
 chaiUse(chaiAsPromised);
 
@@ -14,7 +14,7 @@ chaiUse(chaiAsPromised);
  * Tests for the Environment.
  */
 @suite(timeout(300), slow(50))
-export class FormatWhitelistSpec {
+export class FormatIgnoreSpec {
   private clock: sinon.SinonFakeTimers;
 
   public before(): void {
@@ -32,7 +32,7 @@ export class FormatWhitelistSpec {
       { type: "FIELD_REMOVED", description: "User.name was removed" },
     ];
 
-    const output = formatWhitelist(changes).split("\n").map((line) => JSON.parse(line));
+    const output = formatIgnore(changes).split("\n").map((line) => JSON.parse(line));
 
     expect(output[0]).to.deep.eq(
       { ...changes[0], timestamp: this.clock.Date().getTime() },

@@ -1,4 +1,4 @@
-import { expect, use as chaiUse } from "chai";
+import { use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chalk from "chalk";
 import { BreakingChange } from "graphql";
@@ -7,7 +7,6 @@ import shelljs from "shelljs";
 import sinon from "sinon";
 import td from "testdouble";
 import { formatPretty } from "./formatPretty";
-import { formatWhitelist } from "./formatWhitelist";
 import { reportBreakingChanges } from "./reportBreakingChanges";
 
 chaiUse(chaiAsPromised);
@@ -38,34 +37,19 @@ export class ReportBreakingChangesSpec {
 
   @test("report no breaking changes in pretty format")
   public prettyNoBreakingChanges(): void {
-    reportBreakingChanges([], "pretty", this.shell);
+    reportBreakingChanges([], this.shell);
     td.verify(
-      this.shell.echo(`  ✨  ${chalk.bold.green("The new schema does not introduce any breaking changes")}`),
-    );
-  }
-
-  @test("don't report no breaking changes in whitelist format")
-  public whitelistNoBreakingChanges(): void {
-    reportBreakingChanges([], "whitelist", this.shell);
-    td.verify(
-      this.shell.echo(td.matchers.anything()),
-      { times: 0 },
+      this.shell.echo(
+        `  ✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`,
+      ),
     );
   }
 
   @test("report breaking changes in pretty format")
   public prettyBreakingChanges(): void {
-    reportBreakingChanges(this.breakingChanges, "pretty", this.shell);
+    reportBreakingChanges(this.breakingChanges, this.shell);
     td.verify(
       this.shell.echo(formatPretty(this.breakingChanges)),
-    );
-  }
-
-  @test("report breaking changes in whitelist format")
-  public whitelistBreakingChanges(): void {
-    reportBreakingChanges(this.breakingChanges, "whitelist", this.shell);
-    td.verify(
-      this.shell.echo(formatWhitelist(this.breakingChanges)),
     );
   }
 }

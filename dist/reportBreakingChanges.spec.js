@@ -19,7 +19,6 @@ const mocha_typescript_1 = require("mocha-typescript");
 const sinon_1 = __importDefault(require("sinon"));
 const testdouble_1 = __importDefault(require("testdouble"));
 const formatPretty_1 = require("./formatPretty");
-const formatWhitelist_1 = require("./formatWhitelist");
 const reportBreakingChanges_1 = require("./reportBreakingChanges");
 chai_1.use(chai_as_promised_1.default);
 // tslint:disable:no-unsafe-any
@@ -47,20 +46,12 @@ let ReportBreakingChangesSpec = class ReportBreakingChangesSpec {
         this.clock.restore();
     }
     prettyNoBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges([], "pretty", this.shell);
-        testdouble_1.default.verify(this.shell.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any breaking changes")}`));
-    }
-    whitelistNoBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges([], "whitelist", this.shell);
-        testdouble_1.default.verify(this.shell.echo(testdouble_1.default.matchers.anything()), { times: 0 });
+        reportBreakingChanges_1.reportBreakingChanges([], this.shell);
+        testdouble_1.default.verify(this.shell.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`));
     }
     prettyBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges, "pretty", this.shell);
+        reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges, this.shell);
         testdouble_1.default.verify(this.shell.echo(formatPretty_1.formatPretty(this.breakingChanges)));
-    }
-    whitelistBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges, "whitelist", this.shell);
-        testdouble_1.default.verify(this.shell.echo(formatWhitelist_1.formatWhitelist(this.breakingChanges)));
     }
 };
 __decorate([
@@ -70,23 +61,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ReportBreakingChangesSpec.prototype, "prettyNoBreakingChanges", null);
 __decorate([
-    mocha_typescript_1.test("don't report no breaking changes in whitelist format"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ReportBreakingChangesSpec.prototype, "whitelistNoBreakingChanges", null);
-__decorate([
     mocha_typescript_1.test("report breaking changes in pretty format"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ReportBreakingChangesSpec.prototype, "prettyBreakingChanges", null);
-__decorate([
-    mocha_typescript_1.test("report breaking changes in whitelist format"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ReportBreakingChangesSpec.prototype, "whitelistBreakingChanges", null);
 ReportBreakingChangesSpec = __decorate([
     mocha_typescript_1.suite(mocha_typescript_1.timeout(300), mocha_typescript_1.slow(50))
 ], ReportBreakingChangesSpec);

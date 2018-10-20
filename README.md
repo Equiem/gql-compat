@@ -39,7 +39,7 @@ Append to whitelist file.
 $ gql-compat -o 'origin/master:path/to/*/*.graphql' -n 'path/to/*/*.graphql' --format whitelist >> path/to/whitelist.json
 ```
 
-Ignore whitelisted breaking changes store in whitelist file.
+Ignore ignored breaking changes store in whitelist file.
 
 ```bash
 $ gql-compat -o 'origin/master:path/to/*/*.graphql' -n 'path/to/*/*.graphql' --whitelist path/to/whitelist.json

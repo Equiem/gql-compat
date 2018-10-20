@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const chalk_1 = __importDefault(require("chalk"));
 const commander_1 = __importDefault(require("commander"));
 const graphql_1 = require("graphql");
 const log4js_1 = require("log4js");
@@ -24,14 +25,25 @@ const reportBreakingChanges_1 = require("./reportBreakingChanges");
 const cmd = commander_1.default
     .name("gql-compat")
     .version("0.0.1")
-    .option("-o, --old-schema <[committish:]glob-pattern>", "A glob pattern matching one or more IDL schema files in the given committish "
-    + "in the current repository. If the committish prefix is ommitted the current working copy is used.")
-    .option("-n, --new-schema <[committish:]glob-pattern>", "A glob pattern matching one or more IDL schema files in the given committish "
-    + "in the current repository. If the committish prefix is ommitted the current working copy is used.")
-    .option("-w, --whitelist <path/to/file>", "The path to a whitelist file, which lists incompatibilities that should be ignored. "
-    + "You can create this file using the 'whitelist' output format.")
-    .option("-t, --whitelist-tolerance <path/to/file>", "The length of time in seconds for which whitelisted breakages are valid", parseInt, 7 * 24 * 60 * 60)
-    .option("-f, --format <pretty|whitelist>", "The format in which output should be displayed.", "pretty");
+    .option("-o, --old-schema <locator>", "The location of one or more IDL schema files.")
+    .option("-n, --new-schema <locator>", "The location of one or more IDL schema files.")
+    .option("-w, --whitelist <path/to/file>", "The path to a whitelist file, listing incompatibilities to be ignored.")
+    .option("-t, --whitelist-tolerance <seconds>", "The length of time for which whitelisted breakages are ignored.", parseInt, 7 * 24 * 60 * 60)
+    .option("-f, --format <pretty|whitelist>", "The output format. Use 'whitelist' to generate contents of a whitelist file.", "pretty");
+commander_1.default.on("--help", () => {
+    shelljs_1.default.echo(`
+
+${chalk_1.default.bold.underline("Locators")}
+
+Locators are a string representing one or more files, either in the current
+working directory or in a committish in the currently active git repository.
+
+  glob                  eg. path/to/**/*.graphql
+  committish:pattern    eg. origin/master:path/to/*/*.graphql
+
+Note that committish:patterns follow the rules of the git ls-tree command which
+is not the same as a glob.`);
+});
 /**
  * The main program entry point.
  */

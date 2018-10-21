@@ -51,7 +51,7 @@ let ReportBreakingChangesSpec = class ReportBreakingChangesSpec {
     }
     prettyNoBreakingChanges() {
         reportBreakingChanges_1.reportBreakingChanges([]);
-        testdouble_1.default.verify(shelljs_1.default.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`));
+        testdouble_1.default.verify(shelljs_1.default.echo(`✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`));
     }
     prettyBreakingChanges() {
         reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges);

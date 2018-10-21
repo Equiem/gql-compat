@@ -44,7 +44,7 @@ export class ReportBreakingChangesSpec {
     reportBreakingChanges([]);
     td.verify(
       shell.echo(
-        `  ✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`,
+        `✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`,
       ),
     );
   }

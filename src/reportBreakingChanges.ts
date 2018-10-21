@@ -8,7 +8,7 @@ import { formatPretty } from "./formatPretty";
  */
 export const reportBreakingChanges = (changes: BreakingChange[]): void => {
   if (changes.length === 0) {
-    shell.echo(`  ✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`);
+    shell.echo(`✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`);
   }
   else {
     shell.echo(formatPretty(changes));

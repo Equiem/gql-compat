@@ -11,7 +11,7 @@ const formatPretty_1 = require("./formatPretty");
  */
 exports.reportBreakingChanges = (changes) => {
     if (changes.length === 0) {
-        shelljs_1.default.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`);
+        shelljs_1.default.echo(`✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`);
     }
     else {
         shelljs_1.default.echo(formatPretty_1.formatPretty(changes));

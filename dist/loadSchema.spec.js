@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // Must be imported before loadSchema.
-const shelljs_1 = __importDefault(require("./mock/shelljs"));
+const shelljs_1 = __importDefault(require("./mocks/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const mocha_typescript_1 = require("mocha-typescript");
@@ -37,6 +37,7 @@ chai_1.use(chai_as_promised_1.default);
 let LoadSchemaSpec = class LoadSchemaSpec {
     after() {
         mock_fs_1.default.restore();
+        testdouble_1.default.reset();
     }
     loadGlobPattern() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -58,7 +59,7 @@ let LoadSchemaSpec = class LoadSchemaSpec {
             const committish = "master";
             const glob = "src/**/*.graphql";
             testdouble_1.default.when(shelljs_1.default.which("git")).thenReturn(false);
-            chai_1.expect(loadSchema_1.loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
+            yield chai_1.expect(loadSchema_1.loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
         });
     }
     loadCommittishGlobPattern() {

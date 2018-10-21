@@ -16,14 +16,14 @@ const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const mocha_typescript_1 = require("mocha-typescript");
 const sinon_1 = __importDefault(require("sinon"));
-const formatPretty_1 = require("./formatPretty");
+const formatBreakingChanges_1 = require("./formatBreakingChanges");
 chai_1.use(chai_as_promised_1.default);
 // tslint:disable:no-unsafe-any
 // tslint:disable:no-unused-expression
 /**
  * Tests for the Environment.
  */
-let FormatPrettySpec = class FormatPrettySpec {
+let FormatBreakingChangesSpec = class FormatBreakingChangesSpec {
     before() {
         this.clock = sinon_1.default.useFakeTimers({ now: new Date() });
     }
@@ -35,8 +35,7 @@ let FormatPrettySpec = class FormatPrettySpec {
             { type: "FIELD_REMOVED", description: "User.uuid was removed" },
             { type: "TYPE_REMOVED", description: "User was removed" },
         ];
-        const output = formatPretty_1.formatPretty(changes);
-        chai_1.expect(output).to.include("Breaking changes were detected");
+        const output = formatBreakingChanges_1.formatBreakingChanges(changes);
         chai_1.expect(output).to.include("FIELD_REMOVED");
         chai_1.expect(output).to.include("User.uuid was removed");
         chai_1.expect(output).to.include("TYPE_REMOVED");
@@ -48,9 +47,9 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], FormatPrettySpec.prototype, "prettyFormat", null);
-FormatPrettySpec = __decorate([
+], FormatBreakingChangesSpec.prototype, "prettyFormat", null);
+FormatBreakingChangesSpec = __decorate([
     mocha_typescript_1.suite(mocha_typescript_1.timeout(300), mocha_typescript_1.slow(50))
-], FormatPrettySpec);
-exports.FormatPrettySpec = FormatPrettySpec;
-//# sourceMappingURL=formatPretty.spec.js.map
+], FormatBreakingChangesSpec);
+exports.FormatBreakingChangesSpec = FormatBreakingChangesSpec;
+//# sourceMappingURL=formatBreakingChanges.spec.js.map

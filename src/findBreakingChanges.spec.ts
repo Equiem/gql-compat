@@ -1,13 +1,8 @@
-// Must be imported before findBreakingChanges.
-import shell from "./mock/shelljs";
-
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
-import chalk from "chalk";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import mock from "mock-fs";
 import sinon from "sinon";
-import td from "testdouble";
 import { IGNORE_FILE } from "./config";
 import { findBreakingChanges } from "./findBreakingChanges";
 
@@ -51,16 +46,19 @@ export class FindBreakingChangesSpec {
       { ignoreTolerance: 1000 },
     );
 
-    expect(breakingChanges).to.eql([
-      {
-        description: "Product.uuid was removed.",
-        type: "FIELD_REMOVED",
-      },
-      {
-        description: "User.firstname changed type from String! to Int!.",
-        type: "FIELD_CHANGED_KIND",
-      },
-    ]);
+    expect(breakingChanges).to.eql({
+      breaking: [
+        {
+          description: "Product.uuid was removed.",
+          type: "FIELD_REMOVED",
+        },
+        {
+          description: "User.firstname changed type from String! to Int!.",
+          type: "FIELD_CHANGED_KIND",
+        },
+      ],
+      ignored: [],
+    });
   }
 
   @test("report ignored changes")
@@ -84,15 +82,19 @@ export class FindBreakingChangesSpec {
       { ignoreTolerance: 1000 },
     );
 
-    expect(breakingChanges).to.eql([
-      {
-        description: "User.firstname changed type from String! to Int!.",
-        type: "FIELD_CHANGED_KIND",
-      },
-    ]);
-
-    td.verify(
-      shell.echo(chalk.yellow("Ignored 1 breaking change in .gql-compat-ignore.")),
-    );
+    expect(breakingChanges).to.eql({
+      breaking: [
+        {
+          description: "User.firstname changed type from String! to Int!.",
+          type: "FIELD_CHANGED_KIND",
+        },
+      ],
+      ignored: [
+        {
+          description: "Product.uuid was removed.",
+          type: "FIELD_REMOVED",
+        },
+      ],
+    });
   }
 }

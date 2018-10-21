@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Must be imported before fs.
 const mock_fs_1 = __importDefault(require("mock-fs"));
 // Must be imported before ignoreBreakingChanges.
-const shelljs_1 = __importDefault(require("./mock/shelljs"));
+const shelljs_1 = __importDefault(require("./mocks/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const chalk_1 = __importDefault(require("chalk"));

@@ -20,15 +20,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// Must be imported before findBreakingChanges.
-const shelljs_1 = __importDefault(require("./mock/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
-const chalk_1 = __importDefault(require("chalk"));
 const mocha_typescript_1 = require("mocha-typescript");
 const mock_fs_1 = __importDefault(require("mock-fs"));
 const sinon_1 = __importDefault(require("sinon"));
-const testdouble_1 = __importDefault(require("testdouble"));
 const config_1 = require("./config");
 const findBreakingChanges_1 = require("./findBreakingChanges");
 chai_1.use(chai_as_promised_1.default);
@@ -57,16 +53,19 @@ let FindBreakingChangesSpec = class FindBreakingChangesSpec {
                 },
             });
             const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 });
-            chai_1.expect(breakingChanges).to.eql([
-                {
-                    description: "Product.uuid was removed.",
-                    type: "FIELD_REMOVED",
-                },
-                {
-                    description: "User.firstname changed type from String! to Int!.",
-                    type: "FIELD_CHANGED_KIND",
-                },
-            ]);
+            chai_1.expect(breakingChanges).to.eql({
+                breaking: [
+                    {
+                        description: "Product.uuid was removed.",
+                        type: "FIELD_REMOVED",
+                    },
+                    {
+                        description: "User.firstname changed type from String! to Int!.",
+                        type: "FIELD_CHANGED_KIND",
+                    },
+                ],
+                ignored: [],
+            });
         });
     }
     reporting() {
@@ -83,13 +82,20 @@ let FindBreakingChangesSpec = class FindBreakingChangesSpec {
                 },
             });
             const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 });
-            chai_1.expect(breakingChanges).to.eql([
-                {
-                    description: "User.firstname changed type from String! to Int!.",
-                    type: "FIELD_CHANGED_KIND",
-                },
-            ]);
-            testdouble_1.default.verify(shelljs_1.default.echo(chalk_1.default.yellow("Ignored 1 breaking change in .gql-compat-ignore.")));
+            chai_1.expect(breakingChanges).to.eql({
+                breaking: [
+                    {
+                        description: "User.firstname changed type from String! to Int!.",
+                        type: "FIELD_CHANGED_KIND",
+                    },
+                ],
+                ignored: [
+                    {
+                        description: "Product.uuid was removed.",
+                        type: "FIELD_REMOVED",
+                    },
+                ],
+            });
         });
     }
 };

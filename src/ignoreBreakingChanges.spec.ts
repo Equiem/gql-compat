@@ -1,7 +1,7 @@
 // Must be imported before fs.
 import mock from "mock-fs";
 // Must be imported before ignoreBreakingChanges.
-import shell from "./mock/shelljs";
+import shell from "./mocks/shelljs";
 
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";

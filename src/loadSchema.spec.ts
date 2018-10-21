@@ -1,5 +1,5 @@
 // Must be imported before loadSchema.
-import shell from "./mock/shelljs";
+import shell from "./mocks/shelljs";
 
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -20,6 +20,7 @@ chaiUse(chaiAsPromised);
 export class LoadSchemaSpec {
   public after(): void {
     mock.restore();
+    td.reset();
   }
 
   @test("load schema from glob pattern")
@@ -46,7 +47,7 @@ export class LoadSchemaSpec {
 
     td.when(shell.which("git")).thenReturn(false);
 
-    expect(loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
+    await expect(loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
   }
 
   @test("load schema from committish:glob pattern")

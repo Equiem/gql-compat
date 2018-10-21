@@ -1,9 +1,11 @@
+// Must be imported before reportBreakingChanges.
+import shell from "./mock/shelljs";
+
 import { use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chalk from "chalk";
 import { BreakingChange } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
-import shelljs from "shelljs";
 import sinon from "sinon";
 import td from "testdouble";
 import { formatPretty } from "./formatPretty";
@@ -19,8 +21,11 @@ chaiUse(chaiAsPromised);
  */
 @suite(timeout(300), slow(50))
 export class ReportBreakingChangesSpec {
+  public static after(): void {
+    td.reset();
+  }
+
   private clock: sinon.SinonFakeTimers;
-  private shell: typeof shelljs;
   private breakingChanges: BreakingChange[] = [
     { type: "FIELD_REMOVED", description: "User.uuid was removed" },
     { type: "FIELD_REMOVED", description: "User.name was removed" },
@@ -28,7 +33,6 @@ export class ReportBreakingChangesSpec {
 
   public before(): void {
     this.clock = sinon.useFakeTimers({ now: new Date() });
-    this.shell = td.object<typeof shelljs>("shell");
   }
 
   public after(): void {
@@ -37,9 +41,9 @@ export class ReportBreakingChangesSpec {
 
   @test("report no breaking changes in pretty format")
   public prettyNoBreakingChanges(): void {
-    reportBreakingChanges([], this.shell);
+    reportBreakingChanges([]);
     td.verify(
-      this.shell.echo(
+      shell.echo(
         `  ✨  ${chalk.bold.green("The new schema does not introduce any unintentional breaking changes")}`,
       ),
     );
@@ -47,9 +51,9 @@ export class ReportBreakingChangesSpec {
 
   @test("report breaking changes in pretty format")
   public prettyBreakingChanges(): void {
-    reportBreakingChanges(this.breakingChanges, this.shell);
+    reportBreakingChanges(this.breakingChanges);
     td.verify(
-      this.shell.echo(formatPretty(this.breakingChanges)),
+      shell.echo(formatPretty(this.breakingChanges)),
     );
   }
 }

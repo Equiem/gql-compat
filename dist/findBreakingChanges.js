@@ -13,22 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const chalk_1 = __importDefault(require("chalk"));
 const graphql_1 = require("graphql");
+const shelljs_1 = __importDefault(require("shelljs"));
 const filterIgnored_1 = require("./filterIgnored");
 const loadSchema_1 = require("./loadSchema");
 const parseFileLocator_1 = require("./parseFileLocator");
 /**
  * Find breaking changes, except those ignored in ignoreFile.
  */
-exports.findBreakingChanges = (oldSchemaLocator, newSchemaLocator, ignoreFile, options, shell) => __awaiter(this, void 0, void 0, function* () {
+exports.findBreakingChanges = (oldSchemaLocator, newSchemaLocator, ignoreFile, options) => __awaiter(this, void 0, void 0, function* () {
     const [oldSchema, newSchema] = yield Promise.all([
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(oldSchemaLocator), shell),
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(newSchemaLocator), shell),
+        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(oldSchemaLocator)),
+        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(newSchemaLocator)),
     ]);
     const unfiltered = graphql_1.findBreakingChanges(oldSchema, newSchema);
     const filtered = filterIgnored_1.filterIgnored(unfiltered, ignoreFile, options.ignoreTolerance * 1000);
     if (unfiltered.length > filtered.length) {
         const ignored = unfiltered.length - filtered.length;
-        shell.echo(chalk_1.default.yellow(`Ignored ${ignored} breaking change${ignored > 1 ? "s" : ""} in ${ignoreFile}.`));
+        shelljs_1.default.echo(chalk_1.default.yellow(`Ignored ${ignored} breaking change${ignored > 1 ? "s" : ""} in ${ignoreFile}.`));
     }
     return filtered;
 });

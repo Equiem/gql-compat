@@ -26,16 +26,16 @@ program
 program
   .command("check <old-schema-locator> <new-schema-locator>")
   .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => {
-    const breakingChanges = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options, shell);
-    reportBreakingChanges(breakingChanges, shell);
+    const breakingChanges = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options);
+    reportBreakingChanges(breakingChanges);
     process.exit(breakingChanges.length === 0 ? 0 : 1);
   });
 
 program
   .command("ignore <old-schema-locator> <new-schema-locator>")
   .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => {
-    const breakingChanges = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options, shell);
-    ignoreBreakingChanges(breakingChanges, IGNORE_FILE, shell);
+    const breakingChanges = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options);
+    ignoreBreakingChanges(breakingChanges, IGNORE_FILE);
   });
 
 program.on("command:*", () => {

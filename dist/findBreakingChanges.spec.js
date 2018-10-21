@@ -20,6 +20,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Must be imported before findBreakingChanges.
+const shelljs_1 = __importDefault(require("./mock/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -38,7 +40,6 @@ chai_1.use(chai_as_promised_1.default);
 let FindBreakingChangesSpec = class FindBreakingChangesSpec {
     before() {
         this.clock = sinon_1.default.useFakeTimers();
-        this.shell = testdouble_1.default.object("shell");
     }
     after() {
         this.clock.restore();
@@ -55,7 +56,7 @@ let FindBreakingChangesSpec = class FindBreakingChangesSpec {
                     "user.graphql": "type User { firstname: Int! lastname: String! }",
                 },
             });
-            const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 }, this.shell);
+            const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 });
             chai_1.expect(breakingChanges).to.eql([
                 {
                     description: "Product.uuid was removed.",
@@ -81,14 +82,14 @@ let FindBreakingChangesSpec = class FindBreakingChangesSpec {
                     "user.graphql": "type User { firstname: Int! lastname: String! }",
                 },
             });
-            const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 }, this.shell);
+            const breakingChanges = yield findBreakingChanges_1.findBreakingChanges("src/version1/*.graphql", "src/version2/*.graphql", ".gql-compat-ignore", { ignoreTolerance: 1000 });
             chai_1.expect(breakingChanges).to.eql([
                 {
                     description: "User.firstname changed type from String! to Int!.",
                     type: "FIELD_CHANGED_KIND",
                 },
             ]);
-            testdouble_1.default.verify(this.shell.echo(chalk_1.default.yellow("Ignored 1 breaking change in .gql-compat-ignore.")));
+            testdouble_1.default.verify(shelljs_1.default.echo(chalk_1.default.yellow("Ignored 1 breaking change in .gql-compat-ignore.")));
         });
     }
 };

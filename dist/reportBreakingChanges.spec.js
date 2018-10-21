@@ -12,6 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Must be imported before reportBreakingChanges.
+const shelljs_1 = __importDefault(require("./mock/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -38,20 +40,22 @@ let ReportBreakingChangesSpec = class ReportBreakingChangesSpec {
             { type: "FIELD_REMOVED", description: "User.name was removed" },
         ];
     }
+    static after() {
+        testdouble_1.default.reset();
+    }
     before() {
         this.clock = sinon_1.default.useFakeTimers({ now: new Date() });
-        this.shell = testdouble_1.default.object("shell");
     }
     after() {
         this.clock.restore();
     }
     prettyNoBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges([], this.shell);
-        testdouble_1.default.verify(this.shell.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`));
+        reportBreakingChanges_1.reportBreakingChanges([]);
+        testdouble_1.default.verify(shelljs_1.default.echo(`  ✨  ${chalk_1.default.bold.green("The new schema does not introduce any unintentional breaking changes")}`));
     }
     prettyBreakingChanges() {
-        reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges, this.shell);
-        testdouble_1.default.verify(this.shell.echo(formatPretty_1.formatPretty(this.breakingChanges)));
+        reportBreakingChanges_1.reportBreakingChanges(this.breakingChanges);
+        testdouble_1.default.verify(shelljs_1.default.echo(formatPretty_1.formatPretty(this.breakingChanges)));
     }
 };
 __decorate([

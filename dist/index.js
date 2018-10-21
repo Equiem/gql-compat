@@ -29,15 +29,15 @@ commander_1.default
 commander_1.default
     .command("check <old-schema-locator> <new-schema-locator>")
     .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
-    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options, shelljs_1.default);
-    reportBreakingChanges_1.reportBreakingChanges(breakingChanges, shelljs_1.default);
+    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
+    reportBreakingChanges_1.reportBreakingChanges(breakingChanges);
     process.exit(breakingChanges.length === 0 ? 0 : 1);
 }));
 commander_1.default
     .command("ignore <old-schema-locator> <new-schema-locator>")
     .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
-    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options, shelljs_1.default);
-    ignoreBreakingChanges_1.ignoreBreakingChanges(breakingChanges, config_1.IGNORE_FILE, shelljs_1.default);
+    const breakingChanges = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
+    ignoreBreakingChanges_1.ignoreBreakingChanges(breakingChanges, config_1.IGNORE_FILE);
 }));
 commander_1.default.on("command:*", () => {
     shelljs_1.default.echo(`Invalid command: ${commander_1.default.args.join(" ")}\nSee --help for a list of available commands.`);

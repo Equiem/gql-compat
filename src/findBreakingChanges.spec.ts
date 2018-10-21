@@ -1,9 +1,11 @@
+// Must be imported before findBreakingChanges.
+import shell from "./mock/shelljs";
+
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import chalk from "chalk";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import mock from "mock-fs";
-import shelljs from "shelljs";
 import sinon from "sinon";
 import td from "testdouble";
 import { IGNORE_FILE } from "./config";
@@ -20,11 +22,9 @@ chaiUse(chaiAsPromised);
 @suite(timeout(300), slow(50))
 export class FindBreakingChangesSpec {
   private clock: sinon.SinonFakeTimers;
-  private shell: typeof shelljs;
 
   public before(): void {
     this.clock = sinon.useFakeTimers();
-    this.shell = td.object<typeof shelljs>("shell");
   }
 
   public after(): void {
@@ -49,7 +49,6 @@ export class FindBreakingChangesSpec {
       "src/version2/*.graphql",
       ".gql-compat-ignore",
       { ignoreTolerance: 1000 },
-      this.shell,
     );
 
     expect(breakingChanges).to.eql([
@@ -83,7 +82,6 @@ export class FindBreakingChangesSpec {
       "src/version2/*.graphql",
       ".gql-compat-ignore",
       { ignoreTolerance: 1000 },
-      this.shell,
     );
 
     expect(breakingChanges).to.eql([
@@ -94,7 +92,7 @@ export class FindBreakingChangesSpec {
     ]);
 
     td.verify(
-      this.shell.echo(chalk.yellow("Ignored 1 breaking change in .gql-compat-ignore.")),
+      shell.echo(chalk.yellow("Ignored 1 breaking change in .gql-compat-ignore.")),
     );
   }
 }

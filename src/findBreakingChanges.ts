@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { BreakingChange } from "graphql";
 import { findBreakingChanges as gqlFindBreakingChanges } from "graphql";
-import shelljs from "shelljs";
+import shell from "shelljs";
 import { CommandOptions } from "./CommandOptions";
 import { filterIgnored } from "./filterIgnored";
 import { loadSchema } from "./loadSchema";
@@ -15,11 +15,10 @@ export const findBreakingChanges = async (
   newSchemaLocator: string,
   ignoreFile: string,
   options: CommandOptions,
-  shell: typeof shelljs,
 ): Promise<BreakingChange[]> => {
   const [oldSchema, newSchema] = await Promise.all([
-    loadSchema(parseFileLocator(oldSchemaLocator), shell),
-    loadSchema(parseFileLocator(newSchemaLocator), shell),
+    loadSchema(parseFileLocator(oldSchemaLocator)),
+    loadSchema(parseFileLocator(newSchemaLocator)),
   ]);
 
   const unfiltered = gqlFindBreakingChanges(oldSchema, newSchema);

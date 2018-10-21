@@ -1,8 +1,10 @@
+// Must be imported before loadSchema.
+import shell from "./mock/shelljs";
+
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import mock from "mock-fs";
-import shelljs from "shelljs";
 import td from "testdouble";
 import { loadSchema } from "./loadSchema";
 
@@ -39,18 +41,16 @@ export class LoadSchemaSpec {
 
   @test("check for presence of git")
   public async checkForGit(): Promise<void> {
-    const shell = td.object<typeof shelljs>("shell");
     const committish = "master";
     const glob = "src/**/*.graphql";
 
     td.when(shell.which("git")).thenReturn(false);
 
-    expect(loadSchema({ committish, glob }, shell)).to.eventually.be.rejectedWith("Sorry, this script requires git");
+    expect(loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
   }
 
   @test("load schema from committish:glob pattern")
   public async loadCommittishGlobPattern(): Promise<void> {
-    const shell = td.object<typeof shelljs>("shell");
     const committish = "master";
     const glob = "src/**/*.graphql";
 
@@ -72,7 +72,7 @@ export class LoadSchemaSpec {
       `,
     });
 
-    const schema = await loadSchema({ committish, glob }, shell);
+    const schema = await loadSchema({ committish, glob });
     const user = schema.getType("User");
     const product = schema.getType("Product");
 

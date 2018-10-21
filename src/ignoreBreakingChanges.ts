@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import fs from "fs";
 import { BreakingChange } from "graphql";
-import shelljs from "shelljs";
+import shell from "shelljs";
 import { formatIgnore } from "./formatIgnore";
 
 /**
@@ -10,7 +10,6 @@ import { formatIgnore } from "./formatIgnore";
 export const ignoreBreakingChanges = (
   changes: BreakingChange[],
   ignoreFile: string,
-  shell: typeof shelljs,
 ): void => {
   if (changes.length > 0) {
     fs.appendFileSync(ignoreFile, `${formatIgnore(changes)}\n`);

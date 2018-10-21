@@ -1,5 +1,7 @@
 // Must be imported before fs.
 import mock from "mock-fs";
+// Must be imported before ignoreBreakingChanges.
+import shell from "./mock/shelljs";
 
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -7,7 +9,6 @@ import chalk from "chalk";
 import fs from "fs";
 import { BreakingChange } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
-import shelljs from "shelljs";
 import sinon from "sinon";
 import td from "testdouble";
 import { formatIgnore } from "./formatIgnore";
@@ -24,7 +25,6 @@ chaiUse(chaiAsPromised);
 @suite(timeout(300), slow(50))
 export class IgnoreBreakingChangesSpec {
   private clock: sinon.SinonFakeTimers;
-  private shell: typeof shelljs;
   private breakingChanges: BreakingChange[] = [
     { type: "FIELD_REMOVED", description: "User.uuid was removed" },
     { type: "FIELD_REMOVED", description: "User.name was removed" },
@@ -32,7 +32,6 @@ export class IgnoreBreakingChangesSpec {
 
   public before(): void {
     this.clock = sinon.useFakeTimers(new Date());
-    this.shell = td.object<typeof shelljs>("shell");
   }
 
   public after(): void {
@@ -44,11 +43,11 @@ export class IgnoreBreakingChangesSpec {
     const ignoreFile = ".gql-compat-ignore";
     mock();
 
-    ignoreBreakingChanges([], ignoreFile, this.shell);
+    ignoreBreakingChanges([], ignoreFile);
     expect(fs.existsSync(ignoreFile), "Ignore file should NOT exist").to.be.false;
 
     td.verify(
-      this.shell.echo(chalk.bold.green("No breaking changes to ignore.")),
+      shell.echo(chalk.bold.green("No breaking changes to ignore.")),
     );
   }
 
@@ -57,14 +56,14 @@ export class IgnoreBreakingChangesSpec {
     const ignoreFile = ".gql-compat-ignore";
     mock();
 
-    ignoreBreakingChanges(this.breakingChanges, ignoreFile, this.shell);
+    ignoreBreakingChanges(this.breakingChanges, ignoreFile);
 
     expect(fs.existsSync(ignoreFile), "Ignore file should exist").to.be.true;
     expect(fs.readFileSync(ignoreFile).toString()).to.eq(
       `${formatIgnore(this.breakingChanges)}\n`,
     );
 
-    td.verify(this.shell.echo(chalk.bold.green(`Wrote 2 breaking changes to ${ignoreFile}.`)));
+    td.verify(shell.echo(chalk.bold.green(`Wrote 2 breaking changes to ${ignoreFile}.`)));
   }
 
   @test("append breaking changes to new line in existing ignore file")
@@ -72,8 +71,8 @@ export class IgnoreBreakingChangesSpec {
     const ignoreFile = ".gql-compat-ignore";
     mock();
 
-    ignoreBreakingChanges(this.breakingChanges.slice(0, 1), ignoreFile, this.shell);
-    ignoreBreakingChanges(this.breakingChanges.slice(1, 2), ignoreFile, this.shell);
+    ignoreBreakingChanges(this.breakingChanges.slice(0, 1), ignoreFile);
+    ignoreBreakingChanges(this.breakingChanges.slice(1, 2), ignoreFile);
 
     expect(fs.existsSync(ignoreFile), "Ignore file should exist").to.be.true;
     expect(fs.readFileSync(ignoreFile).toString()).to.eq(
@@ -81,7 +80,7 @@ export class IgnoreBreakingChangesSpec {
     );
 
     td.verify(
-      this.shell.echo(chalk.bold.green(`Wrote 1 breaking change to ${ignoreFile}.`)),
+      shell.echo(chalk.bold.green(`Wrote 1 breaking change to ${ignoreFile}.`)),
       { times: 2 },
     );
   }

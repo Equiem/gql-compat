@@ -7,11 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const chalk_1 = __importDefault(require("chalk"));
 const graphql_1 = require("graphql");
 const filterIgnored_1 = require("./filterIgnored");
 const loadSchema_1 = require("./loadSchema");
@@ -19,17 +15,17 @@ const parseFileLocator_1 = require("./parseFileLocator");
 /**
  * Find breaking changes, except those ignored in ignoreFile.
  */
-exports.findBreakingChanges = (oldSchemaLocator, newSchemaLocator, ignoreFile, options, shell) => __awaiter(this, void 0, void 0, function* () {
+exports.findBreakingChanges = (oldSchemaLocator, newSchemaLocator, ignoreFile, options) => __awaiter(this, void 0, void 0, function* () {
     const [oldSchema, newSchema] = yield Promise.all([
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(oldSchemaLocator), shell),
-        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(newSchemaLocator), shell),
+        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(oldSchemaLocator)),
+        loadSchema_1.loadSchema(parseFileLocator_1.parseFileLocator(newSchemaLocator)),
     ]);
-    const unfiltered = graphql_1.findBreakingChanges(oldSchema, newSchema);
-    const filtered = filterIgnored_1.filterIgnored(unfiltered, ignoreFile, options.ignoreTolerance * 1000);
-    if (unfiltered.length > filtered.length) {
-        const ignored = unfiltered.length - filtered.length;
-        shell.echo(chalk_1.default.yellow(`Ignored ${ignored} breaking change${ignored > 1 ? "s" : ""} in ${ignoreFile}.`));
+    const all = graphql_1.findBreakingChanges(oldSchema, newSchema);
+    const breaking = filterIgnored_1.filterIgnored(all, ignoreFile, options.ignoreTolerance * 1000);
+    const ignored = [];
+    if (all.length > breaking.length) {
+        ignored.push(...all.filter((change) => breaking.indexOf(change) === -1));
     }
-    return filtered;
+    return { breaking, ignored };
 });
 //# sourceMappingURL=findBreakingChanges.js.map

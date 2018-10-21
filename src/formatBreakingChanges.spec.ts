@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised";
 import { BreakingChange } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import sinon from "sinon";
-import { formatPretty } from "./formatPretty";
+import { formatBreakingChanges } from "./formatBreakingChanges";
 
 chaiUse(chaiAsPromised);
 
@@ -14,7 +14,7 @@ chaiUse(chaiAsPromised);
  * Tests for the Environment.
  */
 @suite(timeout(300), slow(50))
-export class FormatPrettySpec {
+export class FormatBreakingChangesSpec {
   private clock: sinon.SinonFakeTimers;
 
   public before(): void {
@@ -32,9 +32,8 @@ export class FormatPrettySpec {
       { type: "TYPE_REMOVED", description: "User was removed" },
     ];
 
-    const output = formatPretty(changes);
+    const output = formatBreakingChanges(changes);
 
-    expect(output).to.include("Breaking changes were detected");
     expect(output).to.include("FIELD_REMOVED");
     expect(output).to.include("User.uuid was removed");
     expect(output).to.include("TYPE_REMOVED");

@@ -1,5 +1,6 @@
 --ui mocha-typescript
 --require source-map-support/register
+--require ./dist/mocks
 --file ./mocha.env.js
 --watch-extensions
 js dist/**/*.spec.js

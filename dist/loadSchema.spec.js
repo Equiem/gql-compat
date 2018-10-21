@@ -20,6 +20,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Must be imported before loadSchema.
+const shelljs_1 = __importDefault(require("./mocks/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const mocha_typescript_1 = require("mocha-typescript");
@@ -35,6 +37,7 @@ chai_1.use(chai_as_promised_1.default);
 let LoadSchemaSpec = class LoadSchemaSpec {
     after() {
         mock_fs_1.default.restore();
+        testdouble_1.default.reset();
     }
     loadGlobPattern() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -53,20 +56,18 @@ let LoadSchemaSpec = class LoadSchemaSpec {
     }
     checkForGit() {
         return __awaiter(this, void 0, void 0, function* () {
-            const shell = testdouble_1.default.object("shell");
             const committish = "master";
             const glob = "src/**/*.graphql";
-            testdouble_1.default.when(shell.which("git")).thenReturn(false);
-            chai_1.expect(loadSchema_1.loadSchema({ committish, glob }, shell)).to.eventually.be.rejectedWith("Sorry, this script requires git");
+            testdouble_1.default.when(shelljs_1.default.which("git")).thenReturn(false);
+            yield chai_1.expect(loadSchema_1.loadSchema({ committish, glob })).to.eventually.be.rejectedWith("Sorry, this script requires git");
         });
     }
     loadCommittishGlobPattern() {
         return __awaiter(this, void 0, void 0, function* () {
-            const shell = testdouble_1.default.object("shell");
             const committish = "master";
             const glob = "src/**/*.graphql";
-            testdouble_1.default.when(shell.which("git")).thenReturn(true);
-            testdouble_1.default.when(shell.exec(`for file in $(git ls-tree ${committish} -r --name-only ${glob}); `
+            testdouble_1.default.when(shelljs_1.default.which("git")).thenReturn(true);
+            testdouble_1.default.when(shelljs_1.default.exec(`for file in $(git ls-tree ${committish} -r --name-only ${glob}); `
                 + `do git show ${committish}:$file; echo '';`
                 + "done;", { silent: true }))
                 .thenReturn({
@@ -77,7 +78,7 @@ let LoadSchemaSpec = class LoadSchemaSpec {
       type User { firstname: String! lastname: String! }
       `,
             });
-            const schema = yield loadSchema_1.loadSchema({ committish, glob }, shell);
+            const schema = yield loadSchema_1.loadSchema({ committish, glob });
             const user = schema.getType("User");
             const product = schema.getType("Product");
             chai_1.expect(user).not.to.be.undefined;

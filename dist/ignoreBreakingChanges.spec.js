@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // Must be imported before fs.
 const mock_fs_1 = __importDefault(require("mock-fs"));
+// Must be imported before ignoreBreakingChanges.
+const shelljs_1 = __importDefault(require("./mocks/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -43,7 +45,6 @@ let IgnoreBreakingChangesSpec = class IgnoreBreakingChangesSpec {
     }
     before() {
         this.clock = sinon_1.default.useFakeTimers(new Date());
-        this.shell = testdouble_1.default.object("shell");
     }
     after() {
         this.clock.restore();
@@ -51,26 +52,26 @@ let IgnoreBreakingChangesSpec = class IgnoreBreakingChangesSpec {
     dontCreateEmptyFile() {
         const ignoreFile = ".gql-compat-ignore";
         mock_fs_1.default();
-        ignoreBreakingChanges_1.ignoreBreakingChanges([], ignoreFile, this.shell);
+        ignoreBreakingChanges_1.ignoreBreakingChanges([], ignoreFile);
         chai_1.expect(fs_1.default.existsSync(ignoreFile), "Ignore file should NOT exist").to.be.false;
-        testdouble_1.default.verify(this.shell.echo(chalk_1.default.bold.green("No breaking changes to ignore.")));
+        testdouble_1.default.verify(shelljs_1.default.echo(chalk_1.default.bold.green("No breaking changes to ignore.")));
     }
     createIgnoreFile() {
         const ignoreFile = ".gql-compat-ignore";
         mock_fs_1.default();
-        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges, ignoreFile, this.shell);
+        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges, ignoreFile);
         chai_1.expect(fs_1.default.existsSync(ignoreFile), "Ignore file should exist").to.be.true;
         chai_1.expect(fs_1.default.readFileSync(ignoreFile).toString()).to.eq(`${formatIgnore_1.formatIgnore(this.breakingChanges)}\n`);
-        testdouble_1.default.verify(this.shell.echo(chalk_1.default.bold.green(`Wrote 2 breaking changes to ${ignoreFile}.`)));
+        testdouble_1.default.verify(shelljs_1.default.echo(chalk_1.default.bold.green(`Wrote 2 breaking changes to ${ignoreFile}.`)));
     }
     appendToIgnoreFile() {
         const ignoreFile = ".gql-compat-ignore";
         mock_fs_1.default();
-        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges.slice(0, 1), ignoreFile, this.shell);
-        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges.slice(1, 2), ignoreFile, this.shell);
+        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges.slice(0, 1), ignoreFile);
+        ignoreBreakingChanges_1.ignoreBreakingChanges(this.breakingChanges.slice(1, 2), ignoreFile);
         chai_1.expect(fs_1.default.existsSync(ignoreFile), "Ignore file should exist").to.be.true;
         chai_1.expect(fs_1.default.readFileSync(ignoreFile).toString()).to.eq(`${formatIgnore_1.formatIgnore(this.breakingChanges)}\n`);
-        testdouble_1.default.verify(this.shell.echo(chalk_1.default.bold.green(`Wrote 1 breaking change to ${ignoreFile}.`)), { times: 2 });
+        testdouble_1.default.verify(shelljs_1.default.echo(chalk_1.default.bold.green(`Wrote 1 breaking change to ${ignoreFile}.`)), { times: 2 });
     }
 };
 __decorate([

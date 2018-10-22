@@ -92,7 +92,8 @@
     "build": "npm run build-clean && tsc && chmod u+x dist/index.js",
     "mocha": "bin/nyc-mocha --opts $npm_package_config_mochaOpts",
     "debug": "npm run build && npm run mocha",
-    "test": "tslint -p . && npm run build && npm run mocha && bin/no-tracked-changes"
+    "lint": "tslint -p . ",
+    "test": "npm run lint && npm run build && npm run mocha && bin/no-tracked-changes"
   },
   "repository": {
     "type": "git",

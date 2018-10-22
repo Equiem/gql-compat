@@ -13,6 +13,19 @@ import { reportBreakingChanges } from "./reportBreakingChanges";
 const mainLogger = getLogger();
 mainLogger.level = process.env.LOG_LEVEL != null ? process.env.LOG_LEVEL : "error";
 
+const exec = async (action: () => Promise<number>): Promise<void> => {
+  try {
+    process.exit(await action());
+  }
+  catch (e) {
+    mainLogger.error(`${e}`);
+    if (e instanceof Error && e.stack != null) {
+      mainLogger.debug(e.stack);
+    }
+    process.exit(1);
+  }
+};
+
 program
   .name("gql-compat")
   .version("0.0.1")
@@ -25,18 +38,21 @@ program
 
 program
   .command("check <old-schema-locator> <new-schema-locator>")
-  .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => {
+  .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => exec(async () => {
     const changes = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options);
     reportBreakingChanges(changes.breaking, changes.ignored);
-    process.exit(changes.breaking.length === 0 ? 0 : 1);
-  });
+
+    return changes.breaking.length === 0 ? 0 : 1;
+  }));
 
 program
   .command("ignore <old-schema-locator> <new-schema-locator>")
-  .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => {
+  .action(async (oldLocator: string, newLocator: string, options: CommandOptions): Promise<void> => exec(async () => {
     const changes = await findBreakingChanges(oldLocator, newLocator, IGNORE_FILE, options);
     ignoreBreakingChanges(changes.breaking, IGNORE_FILE);
-  });
+
+    return 0;
+  }));
 
 program.on("command:*", () => {
   shell.echo(`Invalid command: ${program.args.join(" ")}\nSee --help for a list of available commands.`);

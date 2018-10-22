@@ -6,7 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseFileLocator = (pattern) => {
     const parts = pattern.trim().split(":");
     if (parts[1] != null) {
-        return { committish: parts[0], glob: parts[1] };
+        if (parts[0] === "http" || parts[0] === "https") {
+            return { url: parts.join(":") };
+        }
+        else {
+            return { committish: parts[0], glob: parts[1] };
+        }
     }
     return { glob: parts[0] };
 };

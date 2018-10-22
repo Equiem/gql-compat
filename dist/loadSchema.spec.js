@@ -24,10 +24,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shelljs_1 = __importDefault(require("./mocks/shelljs"));
 const chai_1 = require("chai");
 const chai_as_promised_1 = __importDefault(require("chai-as-promised"));
+const graphql_1 = require("graphql");
 const mocha_typescript_1 = require("mocha-typescript");
 const mock_fs_1 = __importDefault(require("mock-fs"));
+const nock_1 = __importDefault(require("nock"));
 const testdouble_1 = __importDefault(require("testdouble"));
 const loadSchema_1 = require("./loadSchema");
+const exampleSchema_json_1 = __importDefault(require("./resources/exampleSchema.json"));
 chai_1.use(chai_as_promised_1.default);
 // tslint:disable:no-unsafe-any
 // tslint:disable:no-unused-expression
@@ -38,6 +41,9 @@ let LoadSchemaSpec = class LoadSchemaSpec {
     after() {
         mock_fs_1.default.restore();
         testdouble_1.default.reset();
+        if (this.nockScope != null) {
+            this.nockScope.done();
+        }
     }
     loadGlobPattern() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -85,6 +91,18 @@ let LoadSchemaSpec = class LoadSchemaSpec {
             chai_1.expect(product).not.to.be.undefined;
         });
     }
+    introspectUrl() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.nockScope = nock_1.default("http://example.com")
+                .post("/graphql", {
+                query: graphql_1.getIntrospectionQuery(),
+            })
+                .reply(200, exampleSchema_json_1.default);
+            const schema = yield loadSchema_1.loadSchema({ url: "http://example.com/graphql" });
+            const profile = schema.getType("Profile");
+            chai_1.expect(profile).not.to.be.undefined;
+        });
+    }
 };
 __decorate([
     mocha_typescript_1.test("load schema from glob pattern"),
@@ -104,6 +122,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], LoadSchemaSpec.prototype, "loadCommittishGlobPattern", null);
+__decorate([
+    mocha_typescript_1.test("load schema by introspecting url"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], LoadSchemaSpec.prototype, "introspectUrl", null);
 LoadSchemaSpec = __decorate([
     mocha_typescript_1.suite(mocha_typescript_1.timeout(300), mocha_typescript_1.slow(50))
 ], LoadSchemaSpec);

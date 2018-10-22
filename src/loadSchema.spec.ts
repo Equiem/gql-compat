@@ -3,10 +3,13 @@ import shell from "./mocks/shelljs";
 
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { getIntrospectionQuery } from "graphql";
 import { slow, suite, test, timeout } from "mocha-typescript";
 import mock from "mock-fs";
+import nock from "nock";
 import td from "testdouble";
 import { loadSchema } from "./loadSchema";
+import exampleSchema from "./resources/exampleSchema.json";
 
 chaiUse(chaiAsPromised);
 
@@ -18,9 +21,15 @@ chaiUse(chaiAsPromised);
  */
 @suite(timeout(300), slow(50))
 export class LoadSchemaSpec {
+  private nockScope: nock.Scope;
+
   public after(): void {
     mock.restore();
     td.reset();
+
+    if (this.nockScope != null) {
+      this.nockScope.done();
+    }
   }
 
   @test("load schema from glob pattern")
@@ -79,5 +88,19 @@ export class LoadSchemaSpec {
 
     expect(user).not.to.be.undefined;
     expect(product).not.to.be.undefined;
+  }
+
+  @test("load schema by introspecting url")
+  public async introspectUrl(): Promise<void> {
+    this.nockScope = nock("http://example.com")
+      .post("/graphql", {
+        query: getIntrospectionQuery(),
+      })
+      .reply(200, exampleSchema);
+
+    const schema = await loadSchema({ url: "http://example.com/graphql" });
+    const profile = schema.getType("Profile");
+
+    expect(profile).not.to.be.undefined;
   }
 }

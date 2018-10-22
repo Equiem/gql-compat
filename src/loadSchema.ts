@@ -1,6 +1,7 @@
 import fs from "fs";
 import globPromise from "glob-promise";
-import { buildSchema, GraphQLSchema } from "graphql";
+import { buildClientSchema, buildSchema, getIntrospectionQuery, GraphQLSchema, IntrospectionQuery } from "graphql";
+import request from "request-promise-native";
 import shell from "shelljs";
 import { ExecOutputReturnValue } from "shelljs";
 import { FileLocator } from "./FileLocator";
@@ -9,13 +10,13 @@ import { FileLocator } from "./FileLocator";
  * Parses a file locator string pattern.
  */
 export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  => {
-  if (locator.committish == null) {
+  if (locator.committish == null && locator.glob != null) {
     const files = await globPromise(locator.glob);
     const data = files.map((name) => fs.readFileSync(name)).join("\n\n");
 
     return buildSchema(data);
   }
-  else {
+  else if (locator.committish != null && locator.glob != null) {
     const committish = locator.committish;
     const glob = locator.glob;
 
@@ -34,5 +35,23 @@ export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  
     }
 
     return buildSchema(result.stdout);
+  }
+  else if (locator.url != null) {
+    const { data, errors } = await request({
+      json: {
+        query: getIntrospectionQuery(),
+      },
+      method: "POST",
+      url: locator.url,
+    }) as { data: IntrospectionQuery; errors?: any};
+
+    if (errors != null) {
+      throw new Error(JSON.stringify(errors, null, 2));
+    }
+
+    return buildClientSchema(data);
+  }
+  else {
+    throw new Error(`Invalid locator provided: ${locator}`);
   }
 };

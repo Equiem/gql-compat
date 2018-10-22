@@ -19,8 +19,10 @@ export class ParseFileLocatorSpec {
 
     const pattern = parseFileLocator(input);
 
-    expect(pattern.committish).to.eq("master");
-    expect(pattern.glob).to.eq("src/**/*.graphql");
+    expect(pattern).to.eql({
+      committish: "master",
+      glob: "src/**/*.graphql",
+    });
   }
 
   @test("extract a glob pattern only")
@@ -28,7 +30,20 @@ export class ParseFileLocatorSpec {
     const input = "src/**/*.graphql";
 
     const pattern = parseFileLocator(input);
-    expect(pattern.committish).to.be.undefined;
-    expect(pattern.glob).to.eq("src/**/*.graphql");
+    expect(pattern).to.eql({ glob: "src/**/*.graphql" });
+  }
+
+  @test("extract an http url")
+  public extractHttpUrl(): void {
+    const input = "http://example.com/graphql";
+    const pattern = parseFileLocator(input);
+    expect(pattern).to.eql({ url: input });
+  }
+
+  @test("extract an https url")
+  public extractHttpsUrl(): void {
+    const input = "https://example.com/graphql";
+    const pattern = parseFileLocator(input);
+    expect(pattern).to.eql({ url: input });
   }
 }

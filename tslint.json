@@ -6,7 +6,8 @@
   ],
   "linterOptions": {
     "exclude": [
-      "src/migration/*"
+      "src/migration/*",
+      "**/*.json"
     ]
   },
   "rules": {

@@ -22,6 +22,18 @@ const ignoreBreakingChanges_1 = require("./ignoreBreakingChanges");
 const reportBreakingChanges_1 = require("./reportBreakingChanges");
 const mainLogger = log4js_1.getLogger();
 mainLogger.level = process.env.LOG_LEVEL != null ? process.env.LOG_LEVEL : "error";
+const exec = (action) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        process.exit(yield action());
+    }
+    catch (e) {
+        mainLogger.error(`${e}`);
+        if (e instanceof Error && e.stack != null) {
+            mainLogger.debug(e.stack);
+        }
+        process.exit(1);
+    }
+});
 commander_1.default
     .name("gql-compat")
     .version("0.0.1")
@@ -29,15 +41,20 @@ commander_1.default
 commander_1.default
     .command("check <old-schema-locator> <new-schema-locator>")
     .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
-    const changes = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
-    reportBreakingChanges_1.reportBreakingChanges(changes.breaking, changes.ignored);
-    process.exit(changes.breaking.length === 0 ? 0 : 1);
+    return exec(() => __awaiter(this, void 0, void 0, function* () {
+        const changes = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
+        reportBreakingChanges_1.reportBreakingChanges(changes.breaking, changes.ignored);
+        return changes.breaking.length === 0 ? 0 : 1;
+    }));
 }));
 commander_1.default
     .command("ignore <old-schema-locator> <new-schema-locator>")
     .action((oldLocator, newLocator, options) => __awaiter(this, void 0, void 0, function* () {
-    const changes = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
-    ignoreBreakingChanges_1.ignoreBreakingChanges(changes.breaking, config_1.IGNORE_FILE);
+    return exec(() => __awaiter(this, void 0, void 0, function* () {
+        const changes = yield findBreakingChanges_1.findBreakingChanges(oldLocator, newLocator, config_1.IGNORE_FILE, options);
+        ignoreBreakingChanges_1.ignoreBreakingChanges(changes.breaking, config_1.IGNORE_FILE);
+        return 0;
+    }));
 }));
 commander_1.default.on("command:*", () => {
     shelljs_1.default.echo(`Invalid command: ${commander_1.default.args.join(" ")}\nSee --help for a list of available commands.`);

@@ -26,14 +26,25 @@ let ParseFileLocatorSpec = class ParseFileLocatorSpec {
     extractCommittishAndGlobPattern() {
         const input = "master:src/**/*.graphql";
         const pattern = parseFileLocator_1.parseFileLocator(input);
-        chai_1.expect(pattern.committish).to.eq("master");
-        chai_1.expect(pattern.glob).to.eq("src/**/*.graphql");
+        chai_1.expect(pattern).to.eql({
+            committish: "master",
+            glob: "src/**/*.graphql",
+        });
     }
     extractGlobPattern() {
         const input = "src/**/*.graphql";
         const pattern = parseFileLocator_1.parseFileLocator(input);
-        chai_1.expect(pattern.committish).to.be.undefined;
-        chai_1.expect(pattern.glob).to.eq("src/**/*.graphql");
+        chai_1.expect(pattern).to.eql({ glob: "src/**/*.graphql" });
+    }
+    extractHttpUrl() {
+        const input = "http://example.com/graphql";
+        const pattern = parseFileLocator_1.parseFileLocator(input);
+        chai_1.expect(pattern).to.eql({ url: input });
+    }
+    extractHttpsUrl() {
+        const input = "https://example.com/graphql";
+        const pattern = parseFileLocator_1.parseFileLocator(input);
+        chai_1.expect(pattern).to.eql({ url: input });
     }
 };
 __decorate([
@@ -48,6 +59,18 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ParseFileLocatorSpec.prototype, "extractGlobPattern", null);
+__decorate([
+    mocha_typescript_1.test("extract an http url"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ParseFileLocatorSpec.prototype, "extractHttpUrl", null);
+__decorate([
+    mocha_typescript_1.test("extract an https url"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ParseFileLocatorSpec.prototype, "extractHttpsUrl", null);
 ParseFileLocatorSpec = __decorate([
     mocha_typescript_1.suite(mocha_typescript_1.timeout(300), mocha_typescript_1.slow(50))
 ], ParseFileLocatorSpec);

@@ -14,17 +14,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
 const glob_promise_1 = __importDefault(require("glob-promise"));
 const graphql_1 = require("graphql");
+const request_promise_native_1 = __importDefault(require("request-promise-native"));
 const shelljs_1 = __importDefault(require("shelljs"));
 /**
  * Parses a file locator string pattern.
  */
 exports.loadSchema = (locator) => __awaiter(this, void 0, void 0, function* () {
-    if (locator.committish == null) {
+    if (locator.committish == null && locator.glob != null) {
         const files = yield glob_promise_1.default(locator.glob);
         const data = files.map((name) => fs_1.default.readFileSync(name)).join("\n\n");
         return graphql_1.buildSchema(data);
     }
-    else {
+    else if (locator.committish != null && locator.glob != null) {
         const committish = locator.committish;
         const glob = locator.glob;
         if (!shelljs_1.default.which("git")) {
@@ -37,6 +38,22 @@ exports.loadSchema = (locator) => __awaiter(this, void 0, void 0, function* () {
             throw new Error(result.stderr);
         }
         return graphql_1.buildSchema(result.stdout);
+    }
+    else if (locator.url != null) {
+        const { data, errors } = yield request_promise_native_1.default({
+            json: {
+                query: graphql_1.getIntrospectionQuery(),
+            },
+            method: "POST",
+            url: locator.url,
+        });
+        if (errors != null) {
+            throw new Error(JSON.stringify(errors, null, 2));
+        }
+        return graphql_1.buildClientSchema(data);
+    }
+    else {
+        throw new Error(`Invalid locator provided: ${locator}`);
     }
 });
 //# sourceMappingURL=loadSchema.js.map

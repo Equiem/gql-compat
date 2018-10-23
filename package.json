@@ -1,6 +1,6 @@
 {
-  "name": "@equiem/graphql-compat",
-  "version": "0.0.1",
+  "name": "gql-compat",
+  "version": "0.1.0",
   "description": "A tool for checking the compatibility of two GraphQL schemas.",
   "main": "dist/index.js",
   "bin": {

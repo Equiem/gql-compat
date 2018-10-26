@@ -47,4 +47,4 @@ Now all current breaking changes will be ignored for a period of time (the `--ig
 
 There is a difference between glob matching for the working copy vs. the contents
 of a committish. The former uses a glob match, whereas the latter uses the pattern
-matching of git ls-tree.
+matching of git ls-files.

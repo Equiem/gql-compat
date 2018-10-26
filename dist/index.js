@@ -71,7 +71,7 @@ working directory or in a committish in the currently active git repository.
   glob                  eg. path/to/**/*.graphql
   committish:pattern    eg. origin/master:path/to/*/*.graphql
 
-Note that committish:patterns follow the rules of the git ls-tree command which
+Note that committish:patterns follow the rules of the git ls-files command which
 is not the same as a glob.`);
 });
 commander_1.default.parse(process.argv);

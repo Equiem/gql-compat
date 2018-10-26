@@ -24,7 +24,7 @@ export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  
       throw new Error("Sorry, this script requires git");
     }
 
-    const result = shell.exec(`for file in $(git ls-tree ${committish} -r --name-only ${glob}); `
+    const result = shell.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
       + `do git show ${committish}:$file; echo '';`
       + "done;",
       { silent: true },

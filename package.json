@@ -1,6 +1,6 @@
 {
   "name": "gql-compat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A tool for checking the compatibility of two GraphQL schemas.",
   "main": "dist/index.js",
   "bin": {

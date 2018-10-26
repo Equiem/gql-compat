@@ -31,7 +31,7 @@ exports.loadSchema = (locator) => __awaiter(this, void 0, void 0, function* () {
         if (!shelljs_1.default.which("git")) {
             throw new Error("Sorry, this script requires git");
         }
-        const result = shelljs_1.default.exec(`for file in $(git ls-tree ${committish} -r --name-only ${glob}); `
+        const result = shelljs_1.default.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
             + `do git show ${committish}:$file; echo '';`
             + "done;", { silent: true });
         if (result.code !== 0) {

@@ -73,7 +73,7 @@ let LoadSchemaSpec = class LoadSchemaSpec {
             const committish = "master";
             const glob = "src/**/*.graphql";
             testdouble_1.default.when(shelljs_1.default.which("git")).thenReturn(true);
-            testdouble_1.default.when(shelljs_1.default.exec(`for file in $(git ls-tree ${committish} -r --name-only ${glob}); `
+            testdouble_1.default.when(shelljs_1.default.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
                 + `do git show ${committish}:$file; echo '';`
                 + "done;", { silent: true }))
                 .thenReturn({

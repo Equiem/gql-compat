@@ -108,7 +108,7 @@
     "mocha": "bin/nyc-mocha --opts $npm_package_config_mochaOpts",
     "debug": "npm run build && npm run mocha",
     "lint": "tslint -p . ",
-    "test": "npm run lint && npm run build && npm run mocha && bin/no-tracked-changes",
+    "test": "npm run lint && npm run build && npm run mocha",
     "commit": "git-cz",
     "semantic-release": "semantic-release"
   },

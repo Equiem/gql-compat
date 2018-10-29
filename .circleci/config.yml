@@ -21,7 +21,7 @@ jobs:
       - checkout
       - run: npm install
       - attach_workspace:
-          at: ./dist
+          at: .
       - run: npm run semantic-release
 workflows:
   version: 2

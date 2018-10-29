@@ -28,4 +28,4 @@ workflows:
             - build
           filters:
             branches:
-              only: semantic-release
+              only: master

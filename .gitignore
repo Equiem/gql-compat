@@ -6,3 +6,4 @@ src/graphql/types.ts
 coverage
 mocha.log
 newrelic_agent.log
+/dist

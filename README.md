@@ -6,13 +6,13 @@ A CLI tool for checking whether one GraphQL schema is backwards compatible with 
 
 ### Global
 ```bash
-npm install -g https://github.com/Equiem/graphql-compat#master
+npm install -g @equiem/gql-compat
 gql-compat --help
 ```
 
 ### Local
 ```bash
-npm install --save-dev https://github.com/Equiem/graphql-compat#master
+npm install --save-dev @equiem/gql-compat
 ```
 
 Then in `package.json` add:

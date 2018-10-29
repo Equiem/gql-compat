@@ -1,22 +1,31 @@
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
       - image: node:8-wheezy
-    working_directory: /usr/src/app
     steps:
       - checkout
-      - run:
-          name: Install node modules
-          command: npm install
-      - run:
-          name: Commitlint
-          name: npx commitlint --from origin/master --to HEAD
-      - run:
-          name: Run tests
-          command: npm test
-      - run:
-          name: Release
-          command: npm run semantic-release
+      - run: npm install
+      - run: npx commitlint --from origin/master --to HEAD
+      - run: npm test
       - store_artifacts:
-          path: /usr/src/app/coverage
+          path: coverage
+  release:
+    docker:
+      - image: node:8-wheezy
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run semantic-release
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - release
+          context: deploy
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

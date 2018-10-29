@@ -12,7 +12,10 @@ import { FileLocator } from "./FileLocator";
 export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  => {
   if (locator.committish == null && locator.glob != null) {
     const files = await globPromise(locator.glob);
-    const data = files.map((name) => fs.readFileSync(name)).join("\n\n");
+    const data = files.map((name) => fs.readFileSync(name)).join("\n\n").trim();
+    if (data.length === 0) {
+      throw new Error(`Could not find schema at ${locator.glob}`);
+    }
 
     return buildSchema(data);
   }
@@ -32,6 +35,11 @@ export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  
 
     if (result.code !== 0) {
       throw new Error(result.stderr);
+    }
+
+    const data = result.stdout.trim();
+    if (data.length === 0) {
+      throw new Error(`Could not find schema at ${locator.committish}:${locator.glob}`);
     }
 
     return buildSchema(result.stdout);

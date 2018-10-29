@@ -49,6 +49,14 @@ export class LoadSchemaSpec {
     expect(product).not.to.be.undefined;
   }
 
+  @test("throw useful error on missing schema in filesystem")
+  public async loadEmptySchemaFromGlob(): Promise<void> {
+    mock({ });
+    await expect(loadSchema({ glob: "src/**/*.graphql" })).to.eventually.be.rejectedWith(
+      "Could not find schema at src/**/*.graphql",
+    );
+  }
+
   @test("check for presence of git")
   public async checkForGit(): Promise<void> {
     const committish = "master";
@@ -88,6 +96,27 @@ export class LoadSchemaSpec {
 
     expect(user).not.to.be.undefined;
     expect(product).not.to.be.undefined;
+  }
+
+  @test("throw useful error on missing schema in git")
+  public async loadEmptySchemaFromGit(): Promise<void> {
+    const committish = "master";
+    const glob = "src/**/*.graphql";
+
+    td.when(shell.which("git")).thenReturn(true);
+
+    td.when(
+      shell.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
+        + `do git show ${committish}:$file; echo '';`
+        + "done;",
+        { silent: true },
+      ),
+    )
+    .thenReturn({ code: 0, stderr: "", stdout: "" });
+
+    await expect(loadSchema({ committish, glob })).to.eventually.be.rejectedWith(
+      `Could not find schema at ${committish}:${glob}`,
+    );
   }
 
   @test("load schema by introspecting url")

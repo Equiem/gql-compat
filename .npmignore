@@ -1,0 +1,8 @@
+/.circleci
+/.nyc_output
+/bin
+/coverage
+/src
+*~
+*.log
+/.*

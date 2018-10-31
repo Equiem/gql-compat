@@ -65,10 +65,12 @@ program.on("--help", () => {
 ${chalk.bold.underline("Locators")}
 
 Locators are a string representing one or more files, either in the current
-working directory or in a committish in the currently active git repository.
+working directory, in a committish in the currently active git repository, or
+in an npm package.
 
   glob                  eg. path/to/**/*.graphql
   committish:pattern    eg. origin/master:path/to/*/*.graphql
+  npm:package:glob      eg. npm:@my-scope/@my-module@1.2.3:path/to/*/*.graphql
 
 Note that committish:patterns follow the rules of the git ls-files command which
 is not the same as a glob.`,

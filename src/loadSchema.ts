@@ -4,13 +4,14 @@ import { buildClientSchema, buildSchema, getIntrospectionQuery, GraphQLSchema, I
 import request from "request-promise-native";
 import shell from "shelljs";
 import { ExecOutputReturnValue } from "shelljs";
+import { STAGE_DIR } from "./config";
 import { FileLocator } from "./FileLocator";
 
 /**
  * Parses a file locator string pattern.
  */
 export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  => {
-  if (locator.committish == null && locator.glob != null) {
+  if (locator.committish == null && locator.npmPackage == null && locator.glob != null) {
     const files = await globPromise(locator.glob);
     const data = files.map((name) => fs.readFileSync(name)).join("\n\n").trim();
     if (data.length === 0) {
@@ -58,6 +59,47 @@ export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  
     }
 
     return buildClientSchema(data);
+  }
+  else if (locator.npmPackage != null) {
+    const download = `${locator.scope != null ? `${locator.scope}-` : ""}${locator.npmPackage}*.tgz`;
+    const packageName = `${locator.scope != null ? `@${locator.scope}/` : ""}${locator.npmPackage}@${locator.version}`;
+
+    try {
+      if (!shell.which("npm")) {
+        throw new Error("Sorry, this script requires npm");
+      }
+      if (!shell.which("tar")) {
+        throw new Error("Sorry, this script requires tar");
+      }
+
+      const extractResult = shell.exec(
+        `set -x
+        mkdir -p ${STAGE_DIR}
+        cd ${STAGE_DIR}
+        npm pack ${packageName}
+        tar -xzf ${download}`,
+        { silent: true },
+      ) as ExecOutputReturnValue;
+
+      if (extractResult.code !== 0) {
+        throw new Error(extractResult.stderr);
+      }
+
+      const files = await globPromise(`${STAGE_DIR}/package/${locator.glob}`);
+      const data = files.map((name) => fs.readFileSync(name)).join("\n\n").trim();
+      if (data.length === 0) {
+        const pkg = `${locator.scope != null ? `@${locator.scope}/` : ""}${locator.npmPackage}@${locator.version}`;
+        throw new Error(`Could not find schema at ${pkg}:${locator.glob}`);
+      }
+
+      return buildSchema(data);
+    }
+    catch (e) {
+      throw e;
+    }
+    finally {
+      shell.exec(`rm -rf ${STAGE_DIR}`, { silent: true });
+    }
   }
   else {
     throw new Error(`Invalid locator provided: ${locator}`);

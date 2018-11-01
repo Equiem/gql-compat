@@ -8,6 +8,8 @@ import { slow, suite, test, timeout } from "mocha-typescript";
 import mock from "mock-fs";
 import nock from "nock";
 import td from "testdouble";
+import { STAGE_DIR } from "./config";
+import { FileLocator } from "./FileLocator";
 import { loadSchema } from "./loadSchema";
 import exampleSchema from "./resources/exampleSchema.json";
 
@@ -131,5 +133,166 @@ export class LoadSchemaSpec {
     const profile = schema.getType("Profile");
 
     expect(profile).not.to.be.undefined;
+  }
+
+  @test("check for presence of npm")
+  public async checkForNpm(): Promise<void> {
+    const locator: FileLocator = { npmPackage: "my-package" };
+
+    td.when(shell.which("npm")).thenReturn(false);
+
+    await expect(loadSchema(locator)).to.eventually.be.rejectedWith("Sorry, this script requires npm");
+  }
+
+  @test("check for presence of tar")
+  public async checkForTar(): Promise<void> {
+    const locator: FileLocator = { npmPackage: "my-package" };
+
+    td.when(shell.which("npm")).thenReturn(true);
+    td.when(shell.which("tar")).thenReturn(false);
+
+    await expect(loadSchema(locator)).to.eventually.be.rejectedWith("Sorry, this script requires tar");
+  }
+
+  @test("throw error on problem with npm package load or untar")
+  public async loadErrorForNpmPattern(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "latest",
+    };
+
+    td.when(shell.which("npm")).thenReturn(true);
+    td.when(shell.which("tar")).thenReturn(true);
+
+    td.when(
+      shell.exec(
+        td.matchers.argThat((n) => n.indexOf("npm pack") !== -1 && n.indexOf("tar -xzf") !== -1),
+        { silent: true },
+      ),
+    )
+    .thenReturn({ code: 1, stderr: "", stdout: "" });
+
+    expect(loadSchema(locator)).to.eventually.be.rejected;
+  }
+
+  @test("throw error if no schema found in npm package")
+  public async npmNoSchema(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "latest",
+    };
+
+    this.whenNpmPackage(locator, {
+      [`${STAGE_DIR}/package`]: { },
+    });
+
+    expect(loadSchema(locator)).to.eventually.be.rejectedWith(
+      "Could not find schema at @my-scope/my-module@latest:*.graphql",
+    );
+  }
+
+  @test("load schema from npm:my-module:*.graphql")
+  public async loadNpmPattern(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "src/*.graphql",
+      npmPackage: "my-module",
+      scope: undefined,
+      version: "latest",
+    };
+
+    this.whenNpmPackage(locator, {
+      [`${STAGE_DIR}/package/src`]: {
+        "product.graphql": "type Product { uuid: String! name: String! }",
+        "user.graphql": "type User { firstname: String! lastname: String! }",
+      },
+    });
+
+    const schema = await loadSchema(locator);
+    expect(schema.getType("User")).not.to.be.undefined;
+    expect(schema.getType("Product")).not.to.be.undefined;
+  }
+
+  @test("load schema from npm:@my-scope/my-module:*.graphql")
+  public async loadScopedNpmPattern(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "src/*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "latest",
+    };
+
+    this.whenNpmPackage(locator, {
+      [`${STAGE_DIR}/package/src`]: {
+        "product.graphql": "type Product { uuid: String! name: String! }",
+        "user.graphql": "type User { firstname: String! lastname: String! }",
+      },
+    });
+
+    const schema = await loadSchema(locator);
+    expect(schema.getType("User")).not.to.be.undefined;
+    expect(schema.getType("Product")).not.to.be.undefined;
+  }
+
+  @test("load schema from npm:@my-scope/my-module@1.2.3:*.graphql")
+  public async loadScopedVersionedNpmPattern(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "src/*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "1.2.3",
+    };
+
+    this.whenNpmPackage(locator, {
+      [`${STAGE_DIR}/package/src`]: {
+        "product.graphql": "type Product { uuid: String! name: String! }",
+        "user.graphql": "type User { firstname: String! lastname: String! }",
+      },
+    });
+
+    const schema = await loadSchema(locator);
+    expect(schema.getType("User")).not.to.be.undefined;
+    expect(schema.getType("Product")).not.to.be.undefined;
+  }
+
+  @test("delete downloaded package after extraction")
+  public async deleteNpmPackage(): Promise<void> {
+    const locator: FileLocator = {
+      glob: "src/*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "latest",
+    };
+    this.whenNpmPackage(locator, {
+      [`${STAGE_DIR}/package/src`]: { "product.graphql": "type Product { uuid: String! name: String! }" },
+    });
+
+    await loadSchema(locator);
+    td.verify(shell.exec(`rm -rf ${STAGE_DIR}`, { silent: true }));
+  }
+
+  private whenNpmPackage(locator: FileLocator, filesystem: mock.Config): void {
+    td.when(shell.which("npm")).thenReturn(true);
+    td.when(shell.which("tar")).thenReturn(true);
+
+    const packageName = `${locator.scope != null ? `@${locator.scope}/` : ""}${locator.npmPackage}@${locator.version}`;
+    const download = `${locator.scope != null ? `${locator.scope}-` : ""}${locator.npmPackage}*.tgz`;
+
+    td.when(
+      shell.exec(
+        `set -x
+        mkdir -p ${STAGE_DIR}
+        cd ${STAGE_DIR}
+        npm pack ${packageName}
+        tar -xzf ${download}`,
+        { silent: true },
+      ),
+    )
+    .thenReturn({ code: 0, stderr: "", stdout: "" });
+
+    mock(filesystem);
   }
 }

@@ -1,6 +1,7 @@
 import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { slow, suite, test, timeout } from "mocha-typescript";
+import { FileLocator } from "./FileLocator";
 import { parseFileLocator } from "./parseFileLocator";
 
 chaiUse(chaiAsPromised);
@@ -45,5 +46,50 @@ export class ParseFileLocatorSpec {
     const input = "https://example.com/graphql";
     const pattern = parseFileLocator(input);
     expect(pattern).to.eql({ url: input });
+  }
+
+  @test("extract an npm package without scope")
+  public extractNpmPackageWithoutScope(): void {
+    const input = "npm:my-module:**/*.graphql";
+    const pattern = parseFileLocator(input);
+    const expected: FileLocator = {
+      glob: "**/*.graphql",
+      npmPackage: "my-module",
+      scope: undefined,
+      version: "latest",
+    };
+    expect(pattern).to.eql(expected);
+  }
+
+  @test("extract an npm package with scope")
+  public extractNpmPackageWithScope(): void {
+    const input = "npm:@my-scope/my-module:**/*.graphql";
+    const pattern = parseFileLocator(input);
+    const expected: FileLocator = {
+      glob: "**/*.graphql",
+      npmPackage: "my-module",
+      scope: "my-scope",
+      version: "latest",
+    };
+    expect(pattern).to.eql(expected);
+  }
+
+  @test("extract an npm package with version")
+  public extractNpmPackageWithVersion(): void {
+    const input = "npm:my-module@1.2.3:**/*.graphql";
+    const pattern = parseFileLocator(input);
+    const expected: FileLocator = {
+      glob: "**/*.graphql",
+      npmPackage: "my-module",
+      scope: undefined,
+      version: "1.2.3",
+    };
+    expect(pattern).to.eql(expected);
+  }
+
+  @test("error on invalid npm locator")
+  public errorInvalidNpmLocator(): void {
+    const input = "npm:something-invalid";
+    expect(() => parseFileLocator(input)).to.throw("Invalid npm locator");
   }
 }

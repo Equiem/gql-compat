@@ -2,7 +2,9 @@
 
 import chalk from "chalk";
 import program from "commander";
+import fs from "fs";
 import { getLogger } from "log4js";
+import path from "path";
 import shell from "shelljs";
 import { CommandOptions } from "./CommandOptions";
 import { compare } from "./compare";
@@ -27,7 +29,8 @@ const exec = async (action: () => Promise<number>): Promise<void> => {
   }
 };
 
-program.name("gql-compat").version("0.0.1");
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json")).toString()) as { version: string };
+program.name("gql-compat").version(pkg.version);
 
 program
   .command("check <old-schema-locator> <new-schema-locator>")

@@ -78,7 +78,7 @@ export class LoadSchemaSpec {
 
     td.when(
       shell.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
-        + `do git show ${committish}:$file; echo '';`
+        + `do git show ${committish}:./$file; echo '';`
         + "done;",
         { silent: true },
       ),

@@ -29,7 +29,7 @@ export const loadSchema = async (locator: FileLocator): Promise<GraphQLSchema>  
     }
 
     const result = shell.exec(`for file in $(git ls-files --with-tree=${committish} '${glob}'); `
-      + `do git show ${committish}:$file; echo '';`
+      + `do git show ${committish}:./$file; echo '';`
       + "done;",
       { silent: true },
     ) as ExecOutputReturnValue;

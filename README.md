@@ -1,5 +1,7 @@
 # GraphQL Compatibility Checker
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Equiem/gql-compat.svg)](https://greenkeeper.io/)
+
 A CLI tool for checking whether one GraphQL schema is backwards compatible with another.
 
 ## Installation
